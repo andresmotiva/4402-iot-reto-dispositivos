@@ -1,15 +1,17 @@
-# 4402-iot-reto-dispositivos
-
 # Reto 2: Capa de Dispositivos
 
-### Monitoreo de Sensores IoT con ESP8266 NodeMCU
-## Componentes Utilizados:
+`BRAYAN SEBASTIÁN HERNÁNDEZ BARRERA`
+`ANDRÉS RAMÍREZ RESTREPO`
+
+
+
+#### Componentes Utilizados:
 
 - ESP8266 NodeMCU
 - Sensor de Temperatura y Humedad DHT11
 - Fotoresistor GL5516 (Sensor de Luz)
 
-## Requisitos:
+#### Requisitos:
 
 1. **Caracterización de la Intensidad Lumínica:**
    La intensidad lumínica se monitorea utilizando el fotoresistor GL5516. La resistencia del sensor cambia con la intensidad de la luz, proporcionando una señal analógica para la medición.
@@ -22,7 +24,7 @@
    - Se lee el valor analógico del fotoresistor GL5516 y los datos de temperatura y humedad proporcionados por el Sensor de Temperatura y Humedad DHT11.
    - Los datos se envían a los temas MQTT "temperatura," "humedad" y "luminosidad."
 
-## Ejemplo de Salida:
+#### Ejemplo de Salida:
 
 Ejemplo de mensaje JSON enviado a los temas MQTT:
 ```json
