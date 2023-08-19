@@ -28,11 +28,11 @@ const char MQTT_USER[] = "USER";
 const char MQTT_PASS[] = "PASSWORD";
 const char MQTT_SUB_TOPIC[] = HOSTNAME "/";
 //Tópico al que se enviarán los datos de humedad
-const char MQTT_PUB_TOPIC1[] = "humedad/calgary/" HOSTNAME;
+const char MQTT_PUB_TOPIC1[] = "humedad/bogota/" HOSTNAME;
 //Tópico al que se enviarán los dwhatatos de temperatura
-const char MQTT_PUB_TOPIC2[] = "temperatura/calgary/" HOSTNAME;
+const char MQTT_PUB_TOPIC2[] = "temperatura/bogota/" HOSTNAME;
 //Tópico al que se enviarán los datos de temperatura
-const char MQTT_PUB_TOPIC3[] = "luminosidad/calgary/" HOSTNAME;
+const char MQTT_PUB_TOPIC3[] = "luminosidad/bogota/" HOSTNAME;
 
 // Sensor de luz
 const int lightSensorPin = A0;
@@ -203,7 +203,7 @@ void loop()
     //Publica en el tópico de la temperatura
     client.publish(MQTT_PUB_TOPIC2, payload2, false);
     //Publica en el tópico de la luminosidad
-    client.publish(MQTT_PUB_TOPIC3, payload, false);
+    client.publish(MQTT_PUB_TOPIC3, payload3, false);
   }
 
   //Imprime en el monitor serial la información recolectada
@@ -213,6 +213,9 @@ void loop()
   Serial.print(MQTT_PUB_TOPIC2);
   Serial.print(" -> ");
   Serial.println(payload2);
+  Serial.print(MQTT_PUB_TOPIC3);
+  Serial.print(" -> ");
+  Serial.println(payload3);
   /*Espera 5 segundos antes de volver a ejecutar la función loop*/
   delay(5000);
 }
