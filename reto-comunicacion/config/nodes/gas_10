@@ -1,0 +1,10 @@
+List of parameters
+------------------------------------------
+device_type:2
+device_id:10
+device_longitude:-74.06647682189941
+device_latitude:4.601193270452466
+device_elevation:0.0
+device_radius:10.0
+device_hide:0
+natural_event_file_name:Scriptnodosensor1.evt
