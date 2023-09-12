@@ -516,6 +516,67 @@ La respuesta tiene esta estructura:
 }
 """
 
+def get_totalaverage_by_measure_json(request, **kwargs):
+    data_result = {}
+
+    measurements = Measurement.objects.all()
+    measureParam = kwargs.get("measure", None)
+
+    if measureParam != None:
+        selectedMeasure = Measurement.objects.filter(name=measureParam)[0]
+    elif measurements.count() > 0:
+        selectedMeasure = measurements[0]
+
+    locations = Location.objects.all()
+    try:
+        start = datetime.fromtimestamp(
+            float(request.GET.get("from", None)) / 1000
+        )
+    except:
+        start = None
+    try:
+        end = datetime.fromtimestamp(
+            float(request.GET.get("to", None)) / 1000)
+    except:
+        end = None
+    if start == None and end == None:
+        start = datetime.now()
+        start = start - dateutil.relativedelta.relativedelta(weeks=1)
+        end = datetime.now()
+        end += dateutil.relativedelta.relativedelta(days=1)
+    elif end == None:
+        end = datetime.now()
+    elif start == None:
+        start = datetime.fromtimestamp(0)
+
+    avgVal = 0
+    count = 0
+
+    for location in locations:
+        stations = Station.objects.filter(location=location)
+        locationData = Data.objects.filter(
+            station__in=stations, measurement__name=selectedMeasure.name,  time__gte=start.date(), time__lte=end.date())
+        if locationData.count() <= 0:
+            continue
+        avgVal += locationData.aggregate(
+            Avg('value'))['value__avg']
+        count += 1
+
+    if count != 0:
+        totalAvg = avgVal/count
+    else:
+        totalAvg = avgVal
+
+    startFormatted = start.strftime("%d/%m/%Y") if start != None else " "
+    endFormatted = end.strftime("%d/%m/%Y") if end != None else " "
+
+    data_result["measure"] = selectedMeasure.name
+    data_result["start"] = startFormatted
+    data_result["end"] = endFormatted
+    data_result["average"] = round(totalAvg if totalAvg != None else 0, 2)
+
+    return JsonResponse(data_result)
+
 
 def get_map_json(request, **kwargs):
     data_result = {}

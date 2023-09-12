@@ -14,4 +14,6 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('historical/data',
          download_csv_data, name='historical-data'),
+    path('historical/totalaverage/<str:measure>',
+         get_totalaverage_by_measure_json, name='historical-totalaverage'),
 ]
