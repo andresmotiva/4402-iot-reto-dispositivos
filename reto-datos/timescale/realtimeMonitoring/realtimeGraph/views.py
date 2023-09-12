@@ -1,4 +1,4 @@
-from datetime import datetime, tzinfo
+from datetime import datetime, tzinfo, timezone
 import json
 from os import name
 import time
@@ -716,6 +716,88 @@ def download_csv_data(request):
     print("Processed. Time: ", endT - startT)
 
     return FileResponse(open(filename, "rb"), filename="datos-historicos-iot.csv")
+
+"""
+Se obtiene el promedio total por medida y se envía en formato JSON.
+La respuesta tiene esta estructura:
+{
+    "measure": "nombre de la medida",
+    "start": "fecha de inicio en formato dd/mm/yyyy",
+    "end": "fecha de finalización en formato dd/mm/yyyy",
+    "average": float
+}
+"""
+
+def get_totalaverage_by_measure_json(request, **kwargs):
+    data_result = {}
+    measureParam = kwargs.get("measure", None)
+
+    selectedMeasure = Measurement.objects.filter(name=measureParam).first()
+    if not selectedMeasure:
+        selectedMeasure = Measurement.objects.first()
+
+    start, end = get_date_range_from_request(request)
+
+    avgVal, count = get_average_for_all_locations(selectedMeasure, start, end)
+
+    totalAvg = avgVal / count if count != 0 else 0
+
+    data_result = {
+        "measure": selectedMeasure.name if selectedMeasure else "",
+        "start": start.strftime("%d/%m/%Y") if start else " ",
+        "end": end.strftime("%d/%m/%Y") if end else " ",
+        "average": round(totalAvg, 2),
+    }
+
+    return JsonResponse(data_result)
+
+"""
+Se obtiene el rango de fechas desde y hasta de la solicitud.
+Las fechas están en formato UNIX timestamp y se convierten al objeto datetime correspondiente.
+Si no se proporciona alguna de las fechas, se establecen valores predeterminados.
+"""
+
+def get_date_range_from_request(request):
+    try:
+        start = datetime.fromtimestamp(
+            float(request.GET.get("from")) / 1000, tz=timezone.utc)
+    except (TypeError, ValueError):
+        start = datetime.now(timezone.utc) - dateutil.relativedelta.relativedelta(weeks=1)
+
+    try:
+        end = datetime.fromtimestamp(
+            float(request.GET.get("to")) / 1000, tz=timezone.utc)
+    except (TypeError, ValueError):
+        end = datetime.now(timezone.utc)
+
+    return start, end
+
+"""
+Se calcula valor promedio de todos los lugares (locations).
+"""
+
+def get_average_for_all_locations(selectedMeasure, start, end):
+    locations = Location.objects.all()
+    avgVal = 0
+    count = 0
+
+    start_micro = int(start.timestamp() * 1_000_000)
+    end_micro = int(end.timestamp() * 1_000_000)
+
+    for location in locations:
+        stations = Station.objects.filter(location=location)
+        locationData = Data.objects.filter(
+            station__in=stations,
+            measurement=selectedMeasure,
+            time__gte=start_micro,
+            time__lte=end_micro
+        )
+
+        if locationData.exists():
+            avgVal += locationData.aggregate(Avg('avg_value'))['avg_value__avg']
+            count += 1
+
+    return avgVal, count
 
 
 """
